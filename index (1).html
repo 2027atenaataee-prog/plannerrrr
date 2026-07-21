@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>T-Minus / School Prep</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0B1220; --panel:#111A2B; --panel-2:#16223A;
+    --volt:#E8FF52; --coral:#FF5A5F; --text:#EDEFF5; --muted:#8A93A8; --line:#243252;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--ink);color:var(--text);font-family:'Inter',sans-serif;}
+  .wrap{max-width:980px;margin:0 auto;padding:28px 20px 60px;}
+  .eyebrow{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--volt);margin:0 0 6px;}
+  h1{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(28px,4vw,40px);margin:0 0 20px;line-height:1.1;}
+  .target-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:22px;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--muted);}
+  .target-row input[type="date"]{background:var(--panel-2);border:1px solid var(--line);color:var(--text);font-family:'JetBrains Mono',monospace;padding:6px 10px;border-radius:6px;font-size:13px;}
+  .flipboard{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px;}
+  .flip{background:linear-gradient(180deg,var(--panel-2),var(--panel));border:1px solid var(--line);border-radius:10px;padding:14px 10px 10px;min-width:78px;flex:1;text-align:center;position:relative;overflow:hidden;}
+  .flip::after{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:rgba(0,0,0,.35);}
+  .flip .num{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:clamp(30px,5vw,44px);color:var(--volt);line-height:1;font-variant-numeric:tabular-nums;}
+  .flip .lbl{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:6px;}
+  .expired{color:var(--coral);font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:20px;padding:20px 0;}
+  section{margin-top:34px;}
+  .sec-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:6px;}
+  .sec-head h2{font-family:'Space Grotesk',sans-serif;font-size:18px;margin:0;}
+  .sec-head .count{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);}
+  .add-row{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+  .add-row input[type="text"]{flex:1;min-width:180px;background:var(--panel);border:1px solid var(--line);color:var(--text);padding:11px 14px;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;}
+  .add-row input[type="text"]::placeholder{color:var(--muted);}
+  .add-row select{background:var(--panel);border:1px solid var(--line);color:var(--text);padding:11px 10px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:12px;}
+  .add-row button{background:var(--volt);color:#0B1220;border:none;font-weight:700;padding:11px 18px;border-radius:8px;cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:14px;}
+  .add-row button:hover{opacity:.9;}
+  .task{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-bottom:8px;}
+  .task.done{opacity:.45;}
+  .task.done .t-text{text-decoration:line-through;}
+  .task input[type="checkbox"]{width:18px;height:18px;accent-color:var(--volt);cursor:pointer;flex-shrink:0;}
+  .t-text{flex:1;font-size:14px;}
+  .task select{background:var(--panel-2);border:1px solid var(--line);color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:11px;padding:6px 8px;border-radius:6px;}
+  .del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:4px 6px;}
+  .del:hover{color:var(--coral);}
+  .empty{color:var(--muted);font-size:13px;font-style:italic;padding:10px 0;}
+  .daygrid{display:flex;overflow-x:auto;gap:8px;padding-bottom:8px;}
+  .daytile{flex:0 0 auto;min-width:64px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 8px;text-align:center;cursor:pointer;transition:border-color .15s;}
+  .daytile:hover{border-color:var(--volt);}
+  .daytile.active{border-color:var(--volt);background:var(--panel-2);}
+  .daytile .d-num{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--volt);font-size:16px;}
+  .daytile .d-date{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);margin-top:2px;}
+  .daytile .d-count{font-size:10px;color:var(--muted);margin-top:4px;}
+  .filter-note{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--volt);margin:14px 0;cursor:pointer;}
+  ::-webkit-scrollbar{height:6px;}
+  ::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px;}
+
+  /* Sync gate */
+  #syncGate{position:fixed;inset:0;background:var(--ink);z-index:50;display:flex;align-items:center;justify-content:center;padding:20px;}
+  #syncGate .box{max-width:380px;width:100%;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:26px;}
+  #syncGate h2{font-family:'Space Grotesk',sans-serif;margin:0 0 8px;font-size:20px;}
+  #syncGate p{color:var(--muted);font-size:13px;line-height:1.5;margin:0 0 16px;}
+  #syncGate input{width:100%;background:var(--panel-2);border:1px solid var(--line);color:var(--text);padding:12px 14px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:14px;margin-bottom:12px;}
+  #syncGate button{width:100%;background:var(--volt);color:#0B1220;border:none;font-weight:700;padding:12px;border-radius:8px;cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:14px;}
+  #syncStatus{position:fixed;bottom:14px;right:14px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);background:var(--panel);border:1px solid var(--line);padding:6px 10px;border-radius:6px;}
+  .hidden{display:none !important;}
+</style>
+</head>
+<body>
+
+<div id="syncGate">
+  <div class="box">
+    <h2>Your planner code</h2>
+    <p>Set a private code once. Type the same code on any device to load your data. Anyone with this code can see your list, so pick something only you know — not your real name.</p>
+    <input type="text" id="codeInput" placeholder="e.g. mango-runway-22" maxlength="60">
+    <button id="codeBtn">Open my planner</button>
+  </div>
+</div>
+
+<div id="syncStatus" class="hidden">Synced</div>
+
+<div class="wrap hidden" id="app">
+  <p class="eyebrow">// mission clock</p>
+  <h1>Everything before the first bell.</h1>
+
+  <div class="target-row">
+    <span>School starts</span>
+    <input type="date" id="targetDate">
+    <span id="daysAwayLabel"></span>
+    <span style="margin-left:auto;cursor:pointer;text-decoration:underline;" id="switchCode">switch code</span>
+  </div>
+
+  <div class="flipboard" id="flipboard"></div>
+
+  <section>
+    <div class="sec-head"><h2>Everything to do</h2><span class="count" id="taskCount"></span></div>
+    <div class="add-row">
+      <input type="text" id="newTask" placeholder="Add a thing you have to do…" maxlength="200">
+      <select id="newTaskDay"></select>
+      <button id="addBtn">Add</button>
+    </div>
+    <div id="taskList"></div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>Plan it into your days</h2><span class="count">tap a day to filter</span></div>
+    <div class="daygrid" id="dayGrid"></div>
+    <div class="filter-note" id="filterNote" style="display:none;"></div>
+    <div class="add-row" id="dayQuickAdd" style="display:none;">
+      <input type="text" id="dayQuickAddInput" placeholder="Add something for this day…" maxlength="200">
+      <button id="dayQuickAddBtn">Add to day</button>
+    </div>
+  </section>
+</div>
+
+<!-- ====== FIREBASE SETUP ======
+1. Go to https://console.firebase.google.com, create a free project.
+2. In the project, click "Firestore Database" -> Create database -> Start in test mode (or use rules below).
+3. Click the gear icon -> Project settings -> scroll to "Your apps" -> click the web icon (</>) -> register an app.
+4. Copy the firebaseConfig object it gives you and paste it below, replacing the placeholder.
+5. In Firestore rules tab, you can use this simple rule (fine for a personal-use app):
+     rules_version = '2';
+     service cloud.firestore {
+       match /databases/{database}/documents {
+         match /planners/{docId} {
+           allow read, write: if true;
+         }
+       }
+     }
+   ================================ -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  // PASTE YOUR FIREBASE CONFIG HERE:
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  let tasks = [];
+  let targetDate = null;
+  let activeDayFilter = null;
+  let totalDays = 22;
+  let currentCode = null;
+  let unsub = null;
+  let saveTimer = null;
+
+  function defaultTargetDate(){
+    const d = new Date(); d.setDate(d.getDate() + 22);
+    return d.toISOString().slice(0,10);
+  }
+
+  function slugifyCode(raw){
+    return raw.trim().toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9\-]/g,'').slice(0,60);
+  }
+
+  // ---- Sync gate ----
+  const gate = document.getElementById('syncGate');
+  const app_el = document.getElementById('app');
+  const statusEl = document.getElementById('syncStatus');
+
+  document.getElementById('codeBtn').addEventListener('click', () => {
+    const raw = document.getElementById('codeInput').value;
+    const code = slugifyCode(raw);
+    if(!code){ alert('Enter a code first.'); return; }
+    openPlanner(code);
+  });
+  document.getElementById('codeInput').addEventListener('keydown', e => {
+    if(e.key === 'Enter') document.getElementById('codeBtn').click();
+  });
+  document.getElementById('switchCode').addEventListener('click', () => {
+    if(unsub) unsub();
+    localStorage.removeItem('plannerCode'); // ok here: just remembers which code you used, not the data itself
+    location.reload();
+  });
+
+  async function openPlanner(code){
+    currentCode = code;
+    localStorage.setItem('plannerCode', code);
+    gate.classList.add('hidden');
+    app_el.classList.remove('hidden');
+    statusEl.classList.remove('hidden');
+
+    const ref = doc(db, 'planners', currentCode);
+    const snap = await getDoc(ref);
+    if(snap.exists()){
+      const data = snap.data();
+      tasks = data.tasks || [];
+      targetDate = data.targetDate || defaultTargetDate();
+    } else {
+      tasks = [];
+      targetDate = defaultTargetDate();
+      await setDoc(ref, { tasks, targetDate });
+    }
+    document.getElementById('targetDate').value = targetDate;
+    computeTotalDays();
+    renderCountdown();
+    renderAll();
+    setInterval(renderCountdown, 1000);
+
+    // live sync across devices/tabs
+    unsub = onSnapshot(ref, (docSnap) => {
+      if(!docSnap.exists()) return;
+      const data = docSnap.data();
+      tasks = data.tasks || [];
+      targetDate = data.targetDate || targetDate;
+      computeTotalDays();
+      renderAll();
+    });
+  }
+
+  function queueSave(){
+    statusEl.textContent = 'Saving…';
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(async () => {
+      try{
+        await setDoc(doc(db, 'planners', currentCode), { tasks, targetDate });
+        statusEl.textContent = 'Synced';
+      }catch(e){
+        statusEl.textContent = 'Save failed — check connection';
+        console.error(e);
+      }
+    }, 400);
+  }
+
+  function daysBetween(a,b){ const MS=1000*60*60*24; return Math.ceil((b-a)/MS); }
+
+  function computeTotalDays(){
+    const today = new Date(); today.setHours(0,0,0,0);
+    const t = new Date(targetDate+'T00:00:00');
+    totalDays = Math.max(daysBetween(today, t), 1);
+  }
+
+  function renderCountdown(){
+    const now = new Date();
+    const target = new Date(targetDate + 'T08:00:00');
+    const diffMs = target - now;
+    const fb = document.getElementById('flipboard');
+    const lbl = document.getElementById('daysAwayLabel');
+    if(diffMs <= 0){
+      fb.innerHTML = '<div class="expired">School has started. Go get em. 🎒</div>';
+      lbl.textContent = ''; return;
+    }
+    const totalSec = Math.floor(diffMs/1000);
+    const days = Math.floor(totalSec/86400);
+    const hours = Math.floor((totalSec%86400)/3600);
+    const mins = Math.floor((totalSec%3600)/60);
+    const secs = totalSec%60;
+    fb.innerHTML = `
+      <div class="flip"><div class="num">${days}</div><div class="lbl">days</div></div>
+      <div class="flip"><div class="num">${String(hours).padStart(2,'0')}</div><div class="lbl">hrs</div></div>
+      <div class="flip"><div class="num">${String(mins).padStart(2,'0')}</div><div class="lbl">min</div></div>
+      <div class="flip"><div class="num">${String(secs).padStart(2,'0')}</div><div class="lbl">sec</div></div>`;
+    lbl.textContent = `${days} day${days===1?'':'s'} of runway left`;
+  }
+
+  function populateDaySelect(){
+    const sel = document.getElementById('newTaskDay');
+    sel.innerHTML = '<option value="">Unscheduled</option>';
+    for(let i=1;i<=totalDays;i++){
+      const opt = document.createElement('option'); opt.value=i; opt.textContent='Day '+i; sel.appendChild(opt);
+    }
+  }
+
+  function renderDayGrid(){
+    computeTotalDays();
+    const grid = document.getElementById('dayGrid'); grid.innerHTML = '';
+    const today = new Date(); today.setHours(0,0,0,0);
+    for(let i=1;i<=totalDays;i++){
+      const dayDate = new Date(today); dayDate.setDate(today.getDate() + (i-1));
+      const count = tasks.filter(t => String(t.day) === String(i)).length;
+      const tile = document.createElement('div');
+      tile.className = 'daytile' + (activeDayFilter===String(i) ? ' active' : '');
+      tile.innerHTML = `<div class="d-num">D${i}</div><div class="d-date">${dayDate.toLocaleDateString(undefined,{month:'short',day:'numeric'})}</div><div class="d-count">${count ? count+' task'+(count>1?'s':'') : '—'}</div>`;
+      tile.onclick = () => { activeDayFilter = (activeDayFilter === String(i)) ? null : String(i); renderAll(); };
+      grid.appendChild(tile);
+    }
+  }
+
+  function renderFilterNote(){
+    const note = document.getElementById('filterNote');
+    const quickAdd = document.getElementById('dayQuickAdd');
+    const quickInput = document.getElementById('dayQuickAddInput');
+    if(activeDayFilter){
+      note.style.display='block';
+      note.textContent = `Showing Day ${activeDayFilter} only — click again to clear filter`;
+      quickAdd.style.display = 'flex';
+      quickInput.placeholder = `Add something for Day ${activeDayFilter}…`;
+    } else {
+      note.style.display = 'none';
+      quickAdd.style.display = 'none';
+    }
+  }
+
+  function addTaskToDay(day){
+    const input = document.getElementById('dayQuickAddInput');
+    const text = input.value.trim();
+    if(!text) return;
+    tasks.push({ id: 'task_'+Date.now()+'_'+Math.random().toString(36).slice(2,7), text, done:false, day: day });
+    input.value = ''; queueSave(); renderAll();
+  }
+
+  function escapeHtml(str){ const div=document.createElement('div'); div.textContent=str; return div.innerHTML; }
+
+  function renderTaskList(){
+    const list = document.getElementById('taskList');
+    const countLbl = document.getElementById('taskCount');
+    let visible = tasks;
+    if(activeDayFilter) visible = tasks.filter(t => String(t.day) === activeDayFilter);
+    const doneCount = tasks.filter(t=>t.done).length;
+    countLbl.textContent = `${doneCount}/${tasks.length} done`;
+    if(visible.length === 0){
+      list.innerHTML = `<div class="empty">${activeDayFilter ? 'Nothing planned for this day yet.' : 'Nothing here yet — add your first task above.'}</div>`;
+      return;
+    }
+    list.innerHTML = '';
+    visible.forEach(t => {
+      const row = document.createElement('div');
+      row.className = 'task' + (t.done ? ' done' : '');
+      const dayOptions = ['<option value="">Unscheduled</option>'];
+      for(let i=1;i<=totalDays;i++){ dayOptions.push(`<option value="${i}" ${String(t.day)===String(i)?'selected':''}>Day ${i}</option>`); }
+      row.innerHTML = `
+        <input type="checkbox" ${t.done?'checked':''} data-id="${t.id}" class="chk">
+        <span class="t-text">${escapeHtml(t.text)}</span>
+        <select class="dayassign" data-id="${t.id}">${dayOptions.join('')}</select>
+        <button class="del" data-id="${t.id}" title="Delete">✕</button>`;
+      list.appendChild(row);
+    });
+    list.querySelectorAll('.chk').forEach(cb => cb.addEventListener('change', e => {
+      const task = tasks.find(x=>x.id===e.target.getAttribute('data-id'));
+      if(task){ task.done = e.target.checked; queueSave(); renderAll(); }
+    }));
+    list.querySelectorAll('.dayassign').forEach(sel => sel.addEventListener('change', e => {
+      const task = tasks.find(x=>x.id===e.target.getAttribute('data-id'));
+      if(task){ task.day = e.target.value || null; queueSave(); renderAll(); }
+    }));
+    list.querySelectorAll('.del').forEach(btn => btn.addEventListener('click', e => {
+      tasks = tasks.filter(x=>x.id!==e.target.getAttribute('data-id'));
+      queueSave(); renderAll();
+    }));
+  }
+
+  function renderAll(){ renderDayGrid(); populateDaySelect(); renderTaskList(); renderFilterNote(); }
+
+  function addTask(){
+    const input = document.getElementById('newTask');
+    const daySel = document.getElementById('newTaskDay');
+    const text = input.value.trim();
+    if(!text) return;
+    tasks.push({ id: 'task_'+Date.now()+'_'+Math.random().toString(36).slice(2,7), text, done:false, day: daySel.value || null });
+    input.value = ''; queueSave(); renderAll();
+  }
+
+  document.getElementById('addBtn').addEventListener('click', addTask);
+  document.getElementById('newTask').addEventListener('keydown', e => { if(e.key==='Enter') addTask(); });
+  document.getElementById('dayQuickAddBtn').addEventListener('click', () => { if(activeDayFilter) addTaskToDay(activeDayFilter); });
+  document.getElementById('dayQuickAddInput').addEventListener('keydown', e => { if(e.key==='Enter' && activeDayFilter) addTaskToDay(activeDayFilter); });
+  document.getElementById('targetDate').addEventListener('change', e => {
+    targetDate = e.target.value; queueSave(); renderCountdown(); renderAll();
+  });
+
+  // auto-open if a code was used on this device before
+  const remembered = localStorage.getItem('plannerCode');
+  if(remembered){ document.getElementById('codeInput').value = remembered; openPlanner(remembered); }
+</script>
+</body>
+</html>
